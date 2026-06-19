@@ -1,0 +1,25 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: patient-events-rabbitmq
+    hostname: patient-events-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_VHOST: healthcare
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./definitions.json:/etc/rabbitmq/definitions.json:ro
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  rabbitmq_data:

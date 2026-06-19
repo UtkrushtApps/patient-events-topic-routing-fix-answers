@@ -1,0 +1,110 @@
+{
+  "rabbit_version": "3.12.0",
+  "users": [
+    {
+      "name": "admin",
+      "password": "admin",
+      "tags": ["administrator"]
+    },
+    {
+      "name": "patient_app",
+      "password": "patient_app",
+      "tags": []
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "healthcare"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "healthcare",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "patient_app",
+      "vhost": "healthcare",
+      "configure": "^patient\\..*",
+      "write": "^patient\\..*",
+      "read": "^patient\\..*"
+    }
+  ],
+  "policies": [],
+  "parameters": [],
+  "global_parameters": [],
+  "exchanges": [
+    {
+      "name": "patient.events",
+      "vhost": "healthcare",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {
+        "alternate-exchange": "patient.events.unrouted"
+      }
+    },
+    {
+      "name": "patient.events.unrouted",
+      "vhost": "healthcare",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "patient.lab.us.q",
+      "vhost": "healthcare",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "patient.billing.us.q",
+      "vhost": "healthcare",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "patient.unrouted.q",
+      "vhost": "healthcare",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "patient.events",
+      "vhost": "healthcare",
+      "destination": "patient.lab.us.q",
+      "destination_type": "queue",
+      "routing_key": "*.us.patient.lab_result_ready",
+      "arguments": {}
+    },
+    {
+      "source": "patient.events",
+      "vhost": "healthcare",
+      "destination": "patient.billing.us.q",
+      "destination_type": "queue",
+      "routing_key": "*.us.patient.billing_updated",
+      "arguments": {}
+    },
+    {
+      "source": "patient.events.unrouted",
+      "vhost": "healthcare",
+      "destination": "patient.unrouted.q",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    }
+  ]
+}
